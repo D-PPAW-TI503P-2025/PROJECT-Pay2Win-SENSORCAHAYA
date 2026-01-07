@@ -6,6 +6,7 @@ const authRoutes = require('./routes/authRoutes');
 const sensorRoutes = require('./routes/sensorRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
+
 const app = express();
 const PORT = 3000;
 
