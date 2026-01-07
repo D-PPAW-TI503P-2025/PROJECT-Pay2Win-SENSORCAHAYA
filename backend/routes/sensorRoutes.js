@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const sensorController = require('../controllers/sensorController');
+const controller = require('../controllers/sensorController');
+const { isAdmin } = require('../middleware/authMiddleware');
 
-router.post('/sensor', sensorController.insertSensor);
-router.get('/sensor', sensorController.getAllSensor);
-router.get('/sensor/latest', sensorController.getLatestSensor);
+router.post('/sensor', controller.insertSensor);
+router.get('/sensor', isAdmin, controller.getAllSensor);
+router.get('/sensor/latest', controller.getLatestSensor);
 
 module.exports = router;
