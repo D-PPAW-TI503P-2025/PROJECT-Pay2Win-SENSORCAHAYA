@@ -1,0 +1,71 @@
+/* --- GLOBAL --- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f9;
+    margin: 0;
+    color: #333;
+}
+
+/* --- KHUSUS HALAMAN LOGIN/REGISTER (Agar tetap di tengah) --- */
+/* Tambahkan class="login-page" di body file login.html dan register.html */
+body.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    width: 350px;
+}
+
+/* --- DASHBOARD STYLING --- */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+/* WARNA STATUS BADGE & LEGEND */
+.badge-custom {
+    padding: 8px 12px;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.bg-gelap { background-color: #212529; color: white; }        /* Hitam */
+.bg-redup { background-color: #ffc107; color: black; }        /* Kuning */
+.bg-terang { background-color: #198754; color: white; }       /* Hijau */
+.bg-terang-banget { background-color: #dc3545; color: white;} /* Merah */
+
+/* Indikator Warna di Legend */
+.legend-box {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    border-radius: 4px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
