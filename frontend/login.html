@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Sensor App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light d-flex justify-content-center align-items-center vh-100">
+
+    <div class="card p-4 shadow" style="width: 350px;">
+        <h3 class="text-center mb-3">Login</h3>
+        <form id="loginForm">
+            <div class="mb-3">
+                <label>Username</label>
+                <input type="text" id="username" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label>Password</label>
+                <input type="password" id="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Masuk</button>
+        </form>
+        <p class="mt-3 text-center">Belum punya akun? <a href="register.html">Daftar</a></p>
+    </div>
+
+    <script>
+        // GANTI URL INI SESUAI PORT BACKEND KAMU
+        const API_URL = "http://localhost:3000/api";
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // Asumsi route login kamu ada di /login atau /auth/login
+                // Sesuaikan dengan route di server.js kamu
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("Login Berhasil!");
+                    // Simpan Role dan Username untuk dipakai di Dashboard
+                    localStorage.setItem('role', data.role); 
+                    localStorage.setItem('username', username);
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert(data.message || "Login Gagal");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Gagal koneksi ke server");
+            }
+        });
+    </script>
+</body>
+</html>
