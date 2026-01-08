@@ -1,2 +1,3 @@
 TABLE DATABASE 
-<img width="1282" height="616" alt="image" src="https://github.com/user-attachments/assets/3d177723-df05-483c-935f-1cec65d84630" />
+<img width="596" height="563" alt="image" src="https://github.com/user-attachments/assets/9eefe945-4e37-4531-b735-2305445c0032" />
+
