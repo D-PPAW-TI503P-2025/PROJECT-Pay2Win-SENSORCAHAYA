@@ -1,5 +1,16 @@
 // --- KONFIGURASI ---
 const BASE_URL = "http://localhost:3000/api"; 
+const role = localStorage.getItem('role');
+
+// Tampilkan panel admin jika ada
+const adminPanel = document.getElementById('adminPanel');
+if (adminPanel) {
+  if (role === 'admin') {
+    adminPanel.style.display = 'block';
+  } else {
+    adminPanel.style.display = 'none';
+  }
+}
 
 // Jalankan script saat HTML selesai dimuat
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,14 +19,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     const path = window.location.pathname;
 
-    // 1. Jika di Dashboard tapi belum login -> Tendang ke Login
+        // 2. Jika di admin dashboard tapi belum login -> ke login
+    if (path.includes('adminDashboard.html') && !isLoggedIn) {
+        window.location.href = 'login.html';
+    }
+
+    // 1. Jika di dashboard user tapi belum login -> ke login
     if (path.includes('dashboard.html') && !isLoggedIn) {
         window.location.href = 'login.html';
     }
 
-    // 2. Jika di Login tapi sudah login -> Langsung ke Dashboard
+    // 3. Jika sudah login & buka login.html -> redirect sesuai role
     if (path.includes('login.html') && isLoggedIn) {
-        window.location.href = 'dashboard.html';
+        const savedRole = localStorage.getItem('role');
+        if (savedRole === 'admin') {
+            window.location.href = 'adminDashboard.html';
+        } else {
+            window.location.href = 'dashboard.html';
+        }
     }
 
     // --- LOGIC HALAMAN LOGIN ---
@@ -42,11 +63,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Simpan status login
                     localStorage.setItem('isLoggedIn', 'true');
                     localStorage.setItem('role', data.role);
-                    
-                    // PENTING: Jika backend mengirim token, simpan juga!
+                    localStorage.setItem('username', data.username || username);
+
+                    // Jika backend kirim token, simpan juga
                     if (data.token) localStorage.setItem('token', data.token);
 
-                    window.location.href = 'dashboard.html';
+                    // 🔥 REDIRECT SESUAI ROLE
+                    if (data.role === 'admin') {
+                        window.location.href = 'adminDashboard.html';
+                    } else {
+                        window.location.href = 'dashboard.html';
+                    }
+
                 } else {
                     msgElement.innerText = data.message || "Login Gagal";
                 }
@@ -57,8 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- LOGIC HALAMAN DASHBOARD ---
-    // Cek apakah element dashboard ada (supaya tidak error di halaman login)
+    // --- LOGIC HALAMAN DASHBOARD USER ---
     const luxElement = document.getElementById('nilaiLux');
     if (luxElement) {
         // Panggil sekali saat halaman dibuka
@@ -76,7 +103,6 @@ async function updateDashboard() {
 
     try {
         const response = await fetch(`${BASE_URL}/sensor/latest`);
-        
         if (!response.ok) throw new Error("Gagal fetch data");
 
         const data = await response.json();
@@ -92,7 +118,6 @@ async function updateDashboard() {
         // Update Status Box
         statusBox.className = 'status-box'; // Reset class
         
-        // Pastikan huruf kecil semua agar cocok dengan kondisi if
         const status = data.status ? data.status.toLowerCase() : '';
 
         if (status === 'gelap') {
@@ -105,18 +130,16 @@ async function updateDashboard() {
             statusBox.classList.add('bg-terang');
             statusBox.innerText = "☀️ TERANG";
         } else {
-            // Default atau Terang Banget
             statusBox.classList.add('bg-terang-banget');
             statusBox.innerText = "😎 TERANG BANGET";
         }
 
     } catch (error) {
         console.log("Error fetching sensor data:", error);
-        // Opsional: Tampilkan error kecil di UI jika mau
     }
 }
 
-// --- LOGOUT (Harus di luar DOMContentLoaded agar bisa dipanggil onclick HTML) ---
+// --- LOGOUT ---
 function logout() {
     localStorage.clear();
     window.location.href = 'login.html';
