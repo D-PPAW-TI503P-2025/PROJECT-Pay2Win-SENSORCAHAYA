@@ -1,146 +1,129 @@
-// --- KONFIGURASI ---
-const BASE_URL = "http://localhost:3000/api"; 
-const role = localStorage.getItem('role');
+// Mengambil data user yang tersimpan setelah login
+const userData = JSON.parse(localStorage.getItem('user'));
 
-// Tampilkan panel admin jika ada
-const adminPanel = document.getElementById('adminPanel');
-if (adminPanel) {
-  if (role === 'admin') {
-    adminPanel.style.display = 'block';
-  } else {
-    adminPanel.style.display = 'none';
-  }
-}
+function updateNav() {
+    const navMenu = document.getElementById('navMenu');
+    if (!navMenu) return;
 
-// Jalankan script saat HTML selesai dimuat
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // --- CEK STATUS LOGIN (PROTEKSI HALAMAN) ---
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    const path = window.location.pathname;
+    // Menu "Home" selalu tampil untuk semua orang
+    let menuHtml = `<a href="index.html" class="hover:text-blue-200 transition">Home</a>`;
 
-        // 2. Jika di admin dashboard tapi belum login -> ke login
-    if (path.includes('adminDashboard.html') && !isLoggedIn) {
-        window.location.href = 'login.html';
-    }
-
-    // 1. Jika di dashboard user tapi belum login -> ke login
-    if (path.includes('dashboard.html') && !isLoggedIn) {
-        window.location.href = 'login.html';
-    }
-
-    // 3. Jika sudah login & buka login.html -> redirect sesuai role
-    if (path.includes('login.html') && isLoggedIn) {
-        const savedRole = localStorage.getItem('role');
-        if (savedRole === 'admin') {
-            window.location.href = 'adminDashboard.html';
-        } else {
-            window.location.href = 'dashboard.html';
-        }
-    }
-
-    // --- LOGIC HALAMAN LOGIN ---
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const msgElement = document.getElementById('message');
-
-            try {
-                msgElement.innerText = "Loading...";
-                
-                const response = await fetch(`${BASE_URL}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    // Simpan status login
-                    localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('role', data.role);
-                    localStorage.setItem('username', data.username || username);
-
-                    // Jika backend kirim token, simpan juga
-                    if (data.token) localStorage.setItem('token', data.token);
-
-                    // 🔥 REDIRECT SESUAI ROLE
-                    if (data.role === 'admin') {
-                        window.location.href = 'adminDashboard.html';
-                    } else {
-                        window.location.href = 'dashboard.html';
-                    }
-
-                } else {
-                    msgElement.innerText = data.message || "Login Gagal";
-                }
-            } catch (error) {
-                console.error(error);
-                msgElement.innerText = "Gagal koneksi ke server.";
-            }
-        });
-    }
-
-    // --- LOGIC HALAMAN DASHBOARD USER ---
-    const luxElement = document.getElementById('nilaiLux');
-    if (luxElement) {
-        // Panggil sekali saat halaman dibuka
-        updateDashboard();
-
-        // Panggil terus setiap 2 detik (Realtime)
-        setInterval(updateDashboard, 2000);
-    }
-});
-
-// --- FUNGSI UPDATE DASHBOARD ---
-async function updateDashboard() {
-    const luxElement = document.getElementById('nilaiLux');
-    const statusBox = document.getElementById('statusBox');
-
-    try {
-        const response = await fetch(`${BASE_URL}/sensor/latest`);
-        if (!response.ok) throw new Error("Gagal fetch data");
-
-        const data = await response.json();
-
-        if (!data) {
-            statusBox.innerText = "Menunggu data...";
-            return;
-        }
-
-        // Update Angka
-        luxElement.innerText = data.nilai_lux;
-
-        // Update Status Box
-        statusBox.className = 'status-box'; // Reset class
+    if (!userData) {
+        // --- KONDISI BELUM LOGIN ---
+        // Sembunyikan Dashboard, tampilkan Login dan Register
+        menuHtml += `
+            <button onclick="showLogin()" class="bg-white text-blue-600 px-6 py-2 rounded-full font-bold shadow-md hover:bg-blue-50 transition ml-2">Login</button>
+            <button onclick="showRegister()" class="bg-blue-500 text-white px-6 py-2 rounded-full font-bold border border-blue-400 hover:bg-blue-700 transition">Register</button>
+        `;
+    } else {
+        // --- KONDISI SUDAH LOGIN ---
+        // Dashboard muncul untuk semua user/admin yang sudah login
+        menuHtml += `<a href="dashboard.html" class="hover:text-blue-200 transition">Dashboard</a>`;
         
-        const status = data.status ? data.status.toLowerCase() : '';
-
-        if (status === 'gelap') {
-            statusBox.classList.add('bg-gelap');
-            statusBox.innerText = "🌑 GELAP";
-        } else if (status === 'redup') {
-            statusBox.classList.add('bg-redup');
-            statusBox.innerText = "🌥️ REDUP";
-        } else if (status === 'terang') {
-            statusBox.classList.add('bg-terang');
-            statusBox.innerText = "☀️ TERANG";
-        } else {
-            statusBox.classList.add('bg-terang-banget');
-            statusBox.innerText = "😎 TERANG BANGET";
+        // Menu "Kelola User" hanya muncul jika role adalah admin
+        if (userData.role === 'admin') {
+            menuHtml += `<a href="admin-user.html" class="text-yellow-300 font-bold hover:text-yellow-100 transition">Kelola User</a>`;
         }
-
-    } catch (error) {
-        console.log("Error fetching sensor data:", error);
+        
+        // Menampilkan nama user dan tombol Logout
+        menuHtml += `
+            <span class="text-blue-100 text-sm italic ml-4">Halo, ${userData.username}</span>
+            <button onclick="logout()" class="bg-red-500 text-white px-5 py-2 rounded-xl font-bold hover:bg-red-600 transition shadow-lg shadow-red-200">Logout</button>
+        `;
     }
+    navMenu.innerHTML = menuHtml;
 }
 
-// --- LOGOUT ---
+// Fungsi untuk berpindah tampilan ke Form Login
+function showLogin() {
+    // Jika sedang tidak di halaman index, arahkan balik ke index dengan parameter login
+    if (window.location.pathname !== '/' && !window.location.pathname.includes('index.html')) {
+        window.location.href = 'index.html?action=login';
+        return;
+    }
+    document.getElementById('homeContent').classList.add('hidden');
+    document.getElementById('registerSection').classList.add('hidden');
+    document.getElementById('loginSection').classList.remove('hidden');
+}
+
+// Fungsi untuk berpindah tampilan ke Form Register
+function showRegister() {
+    if (window.location.pathname !== '/' && !window.location.pathname.includes('index.html')) {
+        window.location.href = 'index.html?action=register';
+        return;
+    }
+    document.getElementById('homeContent').classList.add('hidden');
+    document.getElementById('loginSection').classList.add('hidden');
+    document.getElementById('registerSection').classList.remove('hidden');
+}
+
+// Handler Submit Login
+if (document.getElementById('loginForm')) {
+    document.getElementById('loginForm').onsubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await fetch('http://localhost:3000/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value
+                })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                // Simpan username dan role
+                localStorage.setItem('user', JSON.stringify({ 
+                    role: data.role, 
+                    username: document.getElementById('username').value 
+                }));
+                // Refresh halaman agar navbar berubah berdasarkan role
+                location.href = 'index.html'; 
+            } else {
+                alert('Login gagal: ' + data.message);
+            }
+        } catch (err) {
+            alert('Gagal terhubung ke server.');
+        }
+    };
+}
+
+// Handler Submit Register
+if (document.getElementById('registerForm')) {
+    document.getElementById('registerForm').onsubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await fetch('http://localhost:3000/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: document.getElementById('regUsername').value,
+                    password: document.getElementById('regPassword').value
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert('Registrasi Berhasil! Silakan Login.');
+                showLogin(); // Arahkan user ke form login setelah register sukses
+            } else {
+                alert('Registrasi gagal: ' + data.message);
+            }
+        } catch (err) {
+            alert('Gagal terhubung ke server.');
+        }
+    };
+}
+
 function logout() {
     localStorage.clear();
-    window.location.href = 'login.html';
+    location.href = 'index.html';
 }
+
+// Menangani aksi otomatis jika diarahkan dari halaman lain (via URL param)
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('action') === 'login') showLogin();
+if (urlParams.get('action') === 'register') showRegister();
+
+// Jalankan fungsi update navbar saat file dimuat
+updateNav();

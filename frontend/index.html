@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>LightSense - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+    <nav class="bg-blue-600 p-4 text-white shadow-lg flex justify-between items-center px-12">
+        <h1 class="font-bold text-xl italic tracking-tighter">LightSense App</h1>
+        <div id="navMenu" class="flex gap-8 items-center font-medium">
+            </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto mt-20 px-6 text-center">
+        <div id="homeContent">
+            <h2 class="text-6xl font-extrabold mb-6 leading-tight text-slate-900">Pantau Cahaya Secara <br><span class="text-blue-600 italic">Real-Time.</span></h2>
+            <p class="text-lg text-slate-600 mb-10 leading-relaxed max-w-2xl mx-auto">
+                Solusi monitoring cerdas menggunakan sensor LDR untuk efisiensi energi dan kenyamanan ruangan Anda secara otomatis.
+            </p>
+            <div class="inline-block bg-blue-100 text-blue-700 px-6 py-3 rounded-2xl font-bold uppercase tracking-widest text-sm mb-12">
+                IoT Based Project 2026
+            </div>
+        </div>
+
+        <div class="flex justify-center">
+            <div id="loginSection" class="hidden w-full max-w-md p-8 bg-white rounded-3xl shadow-2xl border border-slate-100">
+                <h3 class="text-2xl font-bold mb-6 italic text-blue-600">Masuk ke Sistem</h3>
+                <form id="loginForm" class="space-y-4 text-left">
+                    <input type="text" id="username" placeholder="Username" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <input type="password" id="password" placeholder="Password" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">Login</button>
+                    <p class="text-center text-sm mt-4 text-slate-500">Belum punya akun? <button type="button" onclick="showRegister()" class="text-blue-600 font-bold underline">Daftar Sekarang</button></p>
+                </form>
+            </div>
+
+            <div id="registerSection" class="hidden w-full max-w-md p-8 bg-white rounded-3xl shadow-2xl border border-slate-100">
+                <h3 class="text-2xl font-bold mb-6 italic text-green-600">Daftar Akun Baru</h3>
+                <form id="registerForm" class="space-y-4 text-left">
+                    <input type="text" id="regUsername" placeholder="Username Baru" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-green-500" required>
+                    <input type="password" id="regPassword" placeholder="Password Baru" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-green-500" required>
+                    <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 transition shadow-lg">Buat Akun</button>
+                    <p class="text-center text-sm mt-4 text-slate-500">Sudah punya akun? <button type="button" onclick="showLogin()" class="text-blue-600 font-bold underline">Login di sini</button></p>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
