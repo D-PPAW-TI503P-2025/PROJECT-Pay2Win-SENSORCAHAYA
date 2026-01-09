@@ -1,8 +1,8 @@
-// Tambahkan ?role=admin di akhir URL
-const API_ADMIN = 'http://localhost:3000/api/admin/users?role=admin';
+const BASE_URL = 'http://localhost:3000/api/admin/users';
+const ROLE_PARAM = '?role=admin'; // Parameter wajib sesuai authMiddleware.js
 const userAuthData = JSON.parse(localStorage.getItem('user'));
 
-// Deklarasi elemen input agar lebih aman
+// Deklarasi elemen input
 const modalUsername = document.getElementById('modalUsername');
 const modalPassword = document.getElementById('modalPassword');
 const modalRole = document.getElementById('modalRole');
@@ -15,22 +15,19 @@ async function fetchUsers() {
     }
 
     try {
-        const res = await fetch(API_ADMIN);
+        // Fetch menggunakan BASE_URL + ROLE_PARAM
+        const res = await fetch(`${BASE_URL}${ROLE_PARAM}`);
         const users = await res.json();
         
         const tbody = document.getElementById('userList');
-        // Tambahkan pengecekan jika users bukan array (error dari server)
-        if (!Array.isArray(users)) {
-            console.error("Data yang diterima bukan array:", users);
-            return;
-        }
+        if (!Array.isArray(users)) return;
 
         tbody.innerHTML = users.map(user => `
             <tr class="hover:bg-slate-50 transition-colors border-b">
                 <td class="p-4 text-slate-500 font-mono text-sm text-center">${user.id}</td>
                 <td class="p-4 font-semibold text-slate-700">${user.username}</td>
                 <td class="p-4 text-center">
-                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase italic">
+                    <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase italic">
                         ${user.role}
                     </span>
                 </td>
@@ -48,10 +45,17 @@ async function fetchUsers() {
 async function deleteUser(id) {
     if (confirm('Apakah Anda yakin ingin menghapus user ini?')) {
         try {
-            const res = await fetch(`${API_ADMIN}/${id}`, { method: 'DELETE' });
+            // Perbaikan URL: ID dulu baru parameter role
+            const url = `${BASE_URL}/${id}${ROLE_PARAM}`;
+            const res = await fetch(url, { method: 'DELETE' });
             const result = await res.json();
-            alert(result.message || "User dihapus");
-            fetchUsers();
+            
+            if (res.ok) {
+                alert(result.message || "User berhasil dihapus");
+                fetchUsers();
+            } else {
+                alert("Gagal: " + result.message);
+            }
         } catch (err) {
             alert("Gagal menghapus user.");
         }
@@ -69,7 +73,10 @@ document.getElementById('userForm').onsubmit = async (e) => {
     };
 
     const method = id ? 'PUT' : 'POST';
-    const url = id ? `${API_ADMIN}/${id}` : API_ADMIN;
+    // Perbaikan URL: Jika Edit, ID masuk ke dalam path sebelum parameter
+    const url = id 
+        ? `${BASE_URL}/${id}${ROLE_PARAM}` 
+        : `${BASE_URL}${ROLE_PARAM}`;
 
     try {
         const res = await fetch(url, {
@@ -96,7 +103,6 @@ function openModal() {
     document.getElementById('modalTitle').innerText = 'Tambah User Baru';
     document.getElementById('userForm').reset();
     userIdInput.value = '';
-    // Kembalikan required untuk user baru
     modalPassword.required = true; 
 }
 
@@ -105,16 +111,14 @@ function closeModal() {
 }
 
 function editUser(id, username, role) {
-    openModal(); // Buka modal dulu
+    openModal();
     document.getElementById('modalTitle').innerText = 'Edit Data User';
     userIdInput.value = id;
     modalUsername.value = username;
     modalRole.value = role;
-    
-    // TIPS: Saat edit, biasanya password tidak wajib diubah.
-    // Tapi karena backend kamu mewajibkan field password, 
-    // admin harus mengisi password baru atau password lama di sini.
     modalPassword.placeholder = "Isi password baru/lama";
+    // Opsional: Hilangkan required saat edit jika backend mengizinkan password kosong
+    // modalPassword.required = false; 
 }
 
 fetchUsers();
